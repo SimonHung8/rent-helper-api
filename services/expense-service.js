@@ -17,13 +17,20 @@ const expenseService = {
       // 建立額外支出
       const expense = await Expense.create({
         HouseId,
+        UserId: req.user.id,
         price,
         name
       })
-      return cb(null, 200, { expense })
+      return cb(null, 200, { expense: expense.toJSON() })
     } catch (err) {
       cb(err)
     }
+  },
+  deleteExpense: async (req, cb) => {
+    const expense = await Expense.findOne({ where: { id: req.params.id, UserId: req.user.id } })
+    if (!expense) return cb(null, 400, { message: '支出不存在' })
+    const deletedExpense = await expense.destroy()
+    return cb(null, 200, { expense: deletedExpense.toJSON() })
   }
 }
 

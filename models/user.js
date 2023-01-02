@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.House, { foreignKey: 'UserId' })
       User.hasMany(models.Must, { foreignKey: 'UserId' })
       User.hasMany(models.Mustnot, { foreignKey: 'UserId' })
+      User.hasMany(models.Expense, { foreignKey: 'UserId' })
     }
   }
   User.init({
