@@ -7,6 +7,9 @@ const houseController = {
   },
   getHouses: (req, res, next) => {
     houseService.getHouses(req, (err, code, data) => responseHelper(res, next, err, code, data))
+  },
+  addExpense: (req, res, next) => {
+    houseService.addExpense(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }
 }
 

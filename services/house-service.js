@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const { Op } = require('sequelize')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -93,7 +93,8 @@ const houseService = {
           { model: Shape, attributes: ['name'] }
         ],
         attributes: ['id', 'UserId', 'name', 'price', 'area', 'createdAt',
-          [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover']
+          [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
+          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
         ],
         order: [['createdAt', 'DESC']],
         limit,
@@ -102,6 +103,29 @@ const houseService = {
         nest: true
       })
       return cb(null, 200, { houses })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  addExpense: async (req, cb) => {
+    try {
+      const id = parseInt(req.params.id)
+      const user = req.user
+      const price = parseInt(req.body.price)
+      if (!id) return cb(null, 400, { message: 'id is required' })
+      if (!price) return cb(null, 400, { message: 'price is required' })
+      const house = await House.findOne({
+        where: {
+          id,
+          UserId: user.id
+        }
+      })
+      if (!house) cb(null, 400, { message: '物件不存在' })
+      const expense = await Expense.create({
+        HouseId: id,
+        price
+      })
+      return cb(null, 200, { expense })
     } catch (err) {
       cb(err)
     }
