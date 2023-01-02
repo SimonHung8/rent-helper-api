@@ -54,7 +54,6 @@ const houseService = {
           isCover: photo.isCover
         }))
         await Photo.bulkCreate(photos, { transaction: t })
-        result.dataValues.cover = photos.find(photo => photo.isCover).url
 
         // 擁有的設備
         if (!detailData.data.service.facility.length) return result
@@ -71,8 +70,23 @@ const houseService = {
         await Service.bulkCreate(services, { transaction: t })
         return result
       })
+      // 要回傳的資料
+      const house = await House.findByPk(houseData?.dataValues?.id, {
+        include: [
+          { model: Region, attributes: ['name'] },
+          { model: Section, attributes: ['name'] },
+          { model: Kind, attributes: ['name'] },
+          { model: Shape, attributes: ['name'] }
+        ],
+        attributes: ['id', 'UserId', 'name', 'price', 'area', 'createdAt',
+          [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
+          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
+        ],
+        raw: true,
+        nest: true
+      })
 
-      return cb(null, 200, { house: houseData.toJSON() })
+      return cb(null, 200, { house })
     } catch (err) {
       cb(err)
     }
