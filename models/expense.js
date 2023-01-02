@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   Expense.init({
     HouseId: DataTypes.INTEGER,
-    price: DataTypes.INTEGER
+    price: DataTypes.INTEGER,
+    name: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Expense',

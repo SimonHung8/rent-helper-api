@@ -1,12 +1,13 @@
 const fetch = require('node-fetch')
 const { Op } = require('sequelize')
+const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
 const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
     try {
-      const externalId = Number(req.body.externalId)
+      const externalId = parseInt(req.body.externalId)
       if (!externalId) return cb(null, 400, { message: 'externalId is required' })
       // 設定header
       const headers = { 'User-Agent': 'rent-helper', device: 'pc' }
@@ -30,14 +31,13 @@ const houseService = {
       if (!region || !section || !kind || !shape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
       // 建立物件資料與擁有的設備
-      const user = req.user
       const area = detailData.data.info.find(i => i.key === 'area').value
       const price = parseInt(detailData.data.price.replace(/,/g, ''))
 
       const houseData = await sequelize.transaction(async t => {
         // 物件本身的資料
         const result = await House.create({
-          UserId: user.id,
+          UserId: req.user.id,
           externalId,
           name: detailData.data.title,
           RegionId: region.id,
@@ -80,8 +80,9 @@ const houseService = {
   },
   getHouses: async (req, cb) => {
     try {
+      // 每次回傳10筆資料
       const DEFAULT_LIMIT = 10
-      const page = Number(req.query.page) || 1
+      const page = parseInt(req.query.page) || 1
       const limit = DEFAULT_LIMIT
       const offset = (page - 1) * limit
       const houses = await House.findAll({
@@ -109,21 +110,30 @@ const houseService = {
   },
   addExpense: async (req, cb) => {
     try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        const errorMessage = errors.errors.map(e => e.msg)
+        return cb(null, 400, { message: errorMessage })
+      }
+      const { name, price } = req.body
       const id = parseInt(req.params.id)
-      const user = req.user
-      const price = parseInt(req.body.price)
-      if (!id) return cb(null, 400, { message: 'id is required' })
-      if (!price) return cb(null, 400, { message: 'price is required' })
+      // 反查house物件
       const house = await House.findOne({
         where: {
           id,
-          UserId: user.id
+          UserId: req.user.id
         }
       })
-      if (!house) cb(null, 400, { message: '物件不存在' })
+      if (!house) return cb(null, 400, { message: '物件不存在' })
+      // 單一物件最多設定10筆額外支出
+      const DEFAULT_LIMIT = 10
+      const expensesCount = await Expense.count({ where: { HouseId: id } })
+      if (expensesCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
+      // 建立額外支出
       const expense = await Expense.create({
         HouseId: id,
-        price
+        price,
+        name
       })
       return cb(null, 200, { expense })
     } catch (err) {

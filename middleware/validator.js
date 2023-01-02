@@ -20,5 +20,9 @@ module.exports = {
       if (value === req.body.password) return true
       throw new Error()
     }).withMessage('密碼不同')
+  ],
+  expenseValidator: [
+    body('name').isLength({ min: 1, max: 10 }).withMessage('名稱無效'),
+    body('price').isInt({ min: 1, max: 9999 }).withMessage('金額無效')
   ]
 }

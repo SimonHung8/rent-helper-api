@@ -41,9 +41,6 @@ const userService = {
       // 修改敏感資訊
       delete userData.password
       userData.token = false
-      // 刪除不必要資訊
-      delete userData.createdAt
-      delete userData.updatedAt
       // sign JWT token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
       return cb(null, 200, { user: userData, token })
