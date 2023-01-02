@@ -1,4 +1,7 @@
 {
+  "INDEX_URL": "https://rent.591.com.tw",
+  "DETAIL_URL": "https://bff.591.com.tw/v1/house/rent/detail?id=",
+  "PHOTO_URL": "https://bff.591.com.tw/v2/house/photos?type=1&id=",
   "REGION": [
     {
       "external_id": 1,
