@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 const { Op } = require('sequelize')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -96,13 +96,29 @@ const houseService = {
           [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
           [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
         raw: true,
         nest: true
       })
       return cb(null, 200, { houses })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getHouseExpenses: async (req, cb) => {
+    try {
+      const expenses = await Expense.findAll({
+        where: {
+          HouseId: req.params.id,
+          UserId: req.user.id
+        },
+        attributes: ['id', 'HouseId', 'name', 'price'],
+        order: [['createdAt', 'ASC'], ['id', 'ASC']],
+        raw: true
+      })
+      return cb(null, 200, { expenses })
     } catch (err) {
       cb(err)
     }
