@@ -55,6 +55,7 @@ const houseService = {
           isCover: photo.isCover
         }))
         await Photo.bulkCreate(photos, { transaction: t })
+        result.dataValues.cover = photos.find(photo => photo.isCover).url
 
         // 擁有的設備
         if (!detailData.data.service.facility.length) return result
@@ -73,6 +74,34 @@ const houseService = {
       })
 
       return cb(null, 200, { house: houseData.toJSON() })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getHouses: async (req, cb) => {
+    try {
+      const DEFAULT_LIMIT = 10
+      const page = Number(req.query.page) || 1
+      const limit = DEFAULT_LIMIT
+      const offset = (page - 1) * limit
+      const houses = await House.findAll({
+        where: { UserId: req.user.id },
+        include: [
+          { model: Region, attributes: ['name'] },
+          { model: Section, attributes: ['name'] },
+          { model: Kind, attributes: ['name'] },
+          { model: Shape, attributes: ['name'] }
+        ],
+        attributes: ['id', 'UserId', 'name', 'price', 'area', 'createdAt',
+          [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover']
+        ],
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+        raw: true,
+        nest: true
+      })
+      return cb(null, 200, { houses })
     } catch (err) {
       cb(err)
     }
