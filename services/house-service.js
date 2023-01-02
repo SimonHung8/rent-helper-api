@@ -1,8 +1,7 @@
 const fetch = require('node-fetch')
 const { Op } = require('sequelize')
-const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -104,38 +103,6 @@ const houseService = {
         nest: true
       })
       return cb(null, 200, { houses })
-    } catch (err) {
-      cb(err)
-    }
-  },
-  addExpense: async (req, cb) => {
-    try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        const errorMessage = errors.errors.map(e => e.msg)
-        return cb(null, 400, { message: errorMessage })
-      }
-      const { name, price } = req.body
-      const id = parseInt(req.params.id)
-      // 反查house物件
-      const house = await House.findOne({
-        where: {
-          id,
-          UserId: req.user.id
-        }
-      })
-      if (!house) return cb(null, 400, { message: '物件不存在' })
-      // 單一物件最多設定10筆額外支出
-      const DEFAULT_LIMIT = 10
-      const expensesCount = await Expense.count({ where: { HouseId: id } })
-      if (expensesCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
-      // 建立額外支出
-      const expense = await Expense.create({
-        HouseId: id,
-        price,
-        name
-      })
-      return cb(null, 200, { expense })
     } catch (err) {
       cb(err)
     }
