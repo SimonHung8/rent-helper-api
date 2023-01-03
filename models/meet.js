@@ -3,18 +3,18 @@ const {
   Model
 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class Avoid extends Model {
+  class Meet extends Model {
     static associate (models) {
     }
   }
-  Avoid.init({
+  Meet.init({
     HouseId: DataTypes.INTEGER,
-    MustnotId: DataTypes.INTEGER
+    ConditionId: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Avoid',
-    tableName: 'Avoids',
+    modelName: 'Meet',
+    tableName: 'Meets',
     underscored: true
   })
-  return Avoid
+  return Meet
 }

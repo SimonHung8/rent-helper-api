@@ -12,15 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       House.belongsTo(models.Section, { foreignKey: 'SectionId' })
       House.belongsTo(models.Kind, { foreignKey: 'KindId' })
       House.belongsTo(models.Shape, { foreignKey: 'ShapeId' })
-      House.belongsToMany(models.Must, {
-        through: models.Fulfill,
+      House.belongsToMany(models.Condition, {
+        through: models.Meet,
         foreignKey: 'HouseId',
-        as: 'FulfilledMusts'
-      })
-      House.belongsToMany(models.Mustnot, {
-        through: models.Avoid,
-        foreignKey: 'HouseId',
-        as: 'AvoidedMustnots'
+        as: 'MetConditions'
       })
       House.belongsToMany(models.Facility, {
         through: models.Service,

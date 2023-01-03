@@ -2,30 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('Avoids', {
+    await queryInterface.createTable('Conditions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      House_id: {
+      User_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: {
-            tableName: 'Houses'
+            tableName: 'Users'
           }
         }
       },
-      Mustnot_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: {
-            tableName: 'Mustnots'
-          }
-        }
+      name: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
@@ -38,6 +32,6 @@ module.exports = {
     })
   },
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('Avoids')
+    await queryInterface.dropTable('Conditions')
   }
 }

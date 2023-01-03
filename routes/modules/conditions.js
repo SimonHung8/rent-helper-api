@@ -1,9 +1,9 @@
 const router = require('express').Router()
 const authenticated = require('../../middleware/auth')
-const mustController = require('../../controllers/must-controller')
+const conditionController = require('../../controllers/condition-controller')
 const { customizedConditionValidator } = require('../../middleware/validator')
 
-// 新增自訂必備條件
-router.post('/', authenticated, customizedConditionValidator, mustController.addMust)
+// 新增自定義條件
+router.post('/', authenticated, customizedConditionValidator, conditionController.addCondition)
 
 module.exports = router

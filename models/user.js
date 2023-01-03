@@ -6,8 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate (models) {
       User.hasMany(models.House, { foreignKey: 'UserId' })
-      User.hasMany(models.Must, { foreignKey: 'UserId' })
-      User.hasMany(models.Mustnot, { foreignKey: 'UserId' })
+      User.hasMany(models.Condition, { foreignKey: 'UserId' })
       User.hasMany(models.Expense, { foreignKey: 'UserId' })
     }
   }
