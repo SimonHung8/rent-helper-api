@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Expense.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     HouseId: DataTypes.INTEGER,
     UserId: DataTypes.INTEGER,
     price: DataTypes.INTEGER,

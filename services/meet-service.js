@@ -18,7 +18,7 @@ const meetService = {
       if (!house) return cb(null, 400, { message: '物件不存在' })
       const condition = await Condition.findOne({
         where: {
-          id: HouseId,
+          id: ConditionId,
           UserId
         }
       })

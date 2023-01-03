@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Service.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     HouseId: DataTypes.INTEGER,
     FacilityId: DataTypes.INTEGER
   }, {

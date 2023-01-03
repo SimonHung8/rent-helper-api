@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Condition.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     UserId: DataTypes.INTEGER,
     name: DataTypes.STRING
   }, {

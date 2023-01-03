@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Facility.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: DataTypes.STRING
   }, {
     sequelize,

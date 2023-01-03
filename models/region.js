@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Region.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     externalId: DataTypes.INTEGER,
     name: DataTypes.STRING
   }, {

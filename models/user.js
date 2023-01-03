@@ -8,9 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.House, { foreignKey: 'UserId' })
       User.hasMany(models.Condition, { foreignKey: 'UserId' })
       User.hasMany(models.Expense, { foreignKey: 'UserId' })
+      User.hasMany(models.Meet, { foreignKey: 'UserId' })
     }
   }
   User.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: DataTypes.STRING,
     account: DataTypes.STRING,
     password: DataTypes.STRING,

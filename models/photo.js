@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Photo.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     HouseId: DataTypes.INTEGER,
     url: DataTypes.STRING,
     isCover: DataTypes.BOOLEAN
