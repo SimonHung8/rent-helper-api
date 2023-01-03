@@ -23,10 +23,10 @@ const houseService = {
       if (!detailData.status || !photoData.status) return cb(null, 400, { message: '物件不存在' })
 
       // 驗證是否為支援的物件
-      const region = await Region.findOne({ where: { externalId: detailData.data.regionId } })
-      const section = await Section.findOne({ where: { externalId: detailData.data.sectionId } })
-      const kind = await Kind.findOne({ where: { externalId: detailData.data.kind } })
-      const shape = await Shape.findOne({ where: { name: detailData.data.info.find(i => i.key === 'shape').value } })
+      const region = await Region.findOne({ where: { externalId: detailData.data.regionId }, raw: true })
+      const section = await Section.findOne({ where: { externalId: detailData.data.sectionId }, raw: true })
+      const kind = await Kind.findOne({ where: { externalId: detailData.data.kind }, raw: true })
+      const shape = await Shape.findOne({ where: { name: detailData.data.info.find(i => i.key === 'shape').value }, raw: true })
       if (!region || !section || !kind || !shape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
       // 建立物件資料與擁有的設備
@@ -70,19 +70,18 @@ const houseService = {
         await Service.bulkCreate(services, { transaction: t })
         return result
       })
-      // 要回傳的資料
-      const house = await House.findByPk(houseData?.dataValues?.id, {
-        attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
-          [sequelize.literal('(SELECT name FROM Regions WHERE Regions.id = House.Region_id)'), 'region'],
-          [sequelize.literal('(SELECT name FROM Sections WHERE Sections.id = House.Section_id)'), 'section'],
-          [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.id = House.Kind_id)'), 'kind'],
-          [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.id = House.Shape_id)'), 'shape'],
-          [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
-          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
-        ],
-        raw: true,
-        nest: true
-      })
+
+      // 整理要回傳的資料
+      const house = houseData.toJSON()
+      house.region = region.name
+      delete house.RegionId
+      house.section = section.name
+      delete house.SectionId
+      house.kind = kind.name
+      delete house.KindId
+      house.shape = shape.name
+      delete house.ShapeId
+      house.cover = photoData.data.photos.find(photo => photo.isCover).cutPhoto
 
       return cb(null, 200, { house })
     } catch (err) {
