@@ -11,11 +11,12 @@ const conditionService = {
       }
       // 最多設定10筆必備條件
       const DEFAULT_LIMIT = 10
-      const conditionsCount = await Condition.count({ where: { UserId: req.user.id } })
+      const UserId = req.user.id
+      const conditionsCount = await Condition.count({ where: { UserId } })
       if (conditionsCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
       // 建立自定義條件
       const condition = await Condition.create({
-        UserId: req.user.id,
+        UserId,
         name: req.body.name
       })
       return cb(null, 200, { condition: condition.toJSON() })

@@ -9,7 +9,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   Meet.init({
     HouseId: DataTypes.INTEGER,
-    ConditionId: DataTypes.INTEGER
+    ConditionId: DataTypes.INTEGER,
+    UserId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Meet',
