@@ -18,7 +18,8 @@ const userService = {
       const userData = user.toJSON()
       // 修改敏感資訊
       delete userData.password
-      userData.token = !!userData.token
+      userData.hasLineToken = !!userData.token
+      delete userData.token
       // sign JWT token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
       return cb(null, 200, { user: userData, token })
@@ -40,7 +41,7 @@ const userService = {
       const userData = user.toJSON()
       // 修改敏感資訊
       delete userData.password
-      userData.token = false
+      userData.hasLineToken = false
       // sign JWT token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '14d' })
       return cb(null, 200, { user: userData, token })
