@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator')
-const { Condition } = require('../models')
+const { Condition, Meet, sequelize } = require('../models')
 
 const conditionService = {
   addCondition: async (req, cb) => {
@@ -20,6 +20,24 @@ const conditionService = {
         name: req.body.name
       })
       return cb(null, 200, { condition: condition.toJSON() })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  deleteCondition: async (req, cb) => {
+    try {
+      const id = parseInt(req.params.id)
+      if (!id) return cb(null, 400, { message: '自定義條件不存在' })
+      const UserId = req.user.id
+      const condition = await Condition.findOne({ where: { id, UserId } })
+      if (!condition) return cb(null, 400, { message: '自定義條件不存在' })
+      // 刪除condition與關聯的meet
+      const deletedCondition = await sequelize.transaction(async t => {
+        await Meet.destroy({ where: { ConditionId: condition.id }, transaction: t })
+        const result = await condition.destroy({ transaction: t })
+        return result
+      })
+      return cb(null, 200, { condition: deletedCondition.toJSON() })
     } catch (err) {
       cb(err)
     }

@@ -15,9 +15,10 @@ const expenseService = {
       const expensesCount = await Expense.count({ where: { HouseId } })
       if (expensesCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
       // 建立額外支出
+      const UserId = req.user.id
       const expense = await Expense.create({
         HouseId,
-        UserId: req.user.id,
+        UserId,
         price,
         name
       })
@@ -27,7 +28,10 @@ const expenseService = {
     }
   },
   deleteExpense: async (req, cb) => {
-    const expense = await Expense.findOne({ where: { id: req.params.id, UserId: req.user.id } })
+    const id = parseInt(req.params.id)
+    if (!id) return cb(null, 400, { message: '支出不存在' })
+    const UserId = req.user.id
+    const expense = await Expense.findOne({ where: { id, UserId } })
     if (!expense) return cb(null, 400, { message: '支出不存在' })
     const deletedExpense = await expense.destroy()
     return cb(null, 200, { expense: deletedExpense.toJSON() })
