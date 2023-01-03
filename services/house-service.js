@@ -78,7 +78,7 @@ const houseService = {
           { model: Kind, attributes: ['name'] },
           { model: Shape, attributes: ['name'] }
         ],
-        attributes: ['id', 'UserId', 'name', 'price', 'area', 'createdAt',
+        attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
           [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
           [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
         ],
@@ -106,7 +106,7 @@ const houseService = {
           { model: Kind, attributes: ['name'] },
           { model: Shape, attributes: ['name'] }
         ],
-        attributes: ['id', 'UserId', 'name', 'price', 'area', 'createdAt',
+        attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
           [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
           [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
         ],
