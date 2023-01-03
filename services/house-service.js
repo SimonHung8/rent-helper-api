@@ -118,10 +118,13 @@ const houseService = {
   },
   getHouseExpenses: async (req, cb) => {
     try {
+      const HouseId = parseInt(req.params.id)
+      if (!HouseId) return cb(null, 400, { message: 'id is required!' })
+      const UserId = req.user.id
       const expenses = await Expense.findAll({
         where: {
-          HouseId: req.params.id,
-          UserId: req.user.id
+          HouseId,
+          UserId
         },
         attributes: ['id', 'HouseId', 'name', 'price'],
         order: [['createdAt', 'ASC'], ['id', 'ASC']],
