@@ -102,15 +102,47 @@ const houseService = {
       const limit = DEFAULT_LIMIT
       const offset = (page - 1) * limit
       const UserId = req.user.id
+      const { filter } = req.query
+      const conditionsCount = await Condition.count({ where: { UserId } })
+
+      // 不同的篩選情境
+      let whereOptions
+      if (filter === 'allMet') {
+        // 全數符合
+        whereOptions = sequelize.and(
+          sequelize.where(
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Meets WHERE Meets.House_id = House.id)'
+            ),
+            conditionsCount
+          ),
+          { UserId }
+        )
+      } else if (filter === 'notAllMet') {
+        // 未全數符合
+        whereOptions = sequelize.and(
+          sequelize.where(
+            sequelize.literal(
+              '(SELECT COUNT(*) FROM Meets WHERE Meets.House_id = House.id)'
+            ),
+            { [Op.lt]: conditionsCount }
+          ),
+          { UserId }
+        )
+      } else {
+        whereOptions = { UserId }
+      }
+
       const houses = await House.findAll({
-        where: { UserId },
+        where: whereOptions,
         attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
           [sequelize.literal('(SELECT name FROM Regions WHERE Regions.id = House.Region_id)'), 'region'],
           [sequelize.literal('(SELECT name FROM Sections WHERE Sections.id = House.Section_id)'), 'section'],
           [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.id = House.Kind_id)'), 'kind'],
           [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.id = House.Shape_id)'), 'shape'],
           [sequelize.literal('(SELECT url FROM Photos WHERE Photos.House_id = House.id AND Photos.is_cover = true)'), 'cover'],
-          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
+          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses'],
+          [sequelize.literal(`CASE WHEN (SELECT COUNT(*) From Meets WHERE Meets.House_id = House.id) = ${conditionsCount} THEN true ELSE false END`), 'isAllMet']
         ],
         order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
