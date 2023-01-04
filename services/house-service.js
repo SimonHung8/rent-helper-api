@@ -1,5 +1,6 @@
 const fetch = require('node-fetch')
 const { Op } = require('sequelize')
+const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
 const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
 
@@ -131,6 +132,25 @@ const houseService = {
         raw: true
       })
       return cb(null, 200, { expenses })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  editHouseComment: async (req, cb) => {
+    try {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        const errorMessage = errors.errors.map(e => e.msg)
+        return cb(null, 400, { message: errorMessage })
+      }
+      const { comment } = req.body
+      const id = parseInt(req.params.id)
+      const UserId = req.user.id
+      if (!id) return cb(null, 400, { message: 'id is required!' })
+      const house = await House.findOne({ where: { id, UserId } })
+      if (!house) return cb(null, 400, { message: '物件不存在' })
+      const updatedHouse = await house.update({ comment })
+      return cb(null, 200, { house: updatedHouse.toJSON() })
     } catch (err) {
       cb(err)
     }

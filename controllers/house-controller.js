@@ -10,6 +10,9 @@ const houseController = {
   },
   getHouseExpenses: (req, res, next) => {
     houseService.getHouseExpenses(req, (err, code, data) => responseHelper(res, next, err, code, data))
+  },
+  editHouseComment: (req, res, next) => {
+    houseService.editHouseComment(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }
 }
 

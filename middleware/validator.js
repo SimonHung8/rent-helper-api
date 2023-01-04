@@ -38,5 +38,8 @@ module.exports = {
   ],
   customizedConditionValidator: [
     body('name').isLength({ min: 1, max: 20 }).withMessage('名稱無效')
+  ],
+  commentValidator: [
+    body('comment').isLength({ max: 200 }).withMessage('評論無效')
   ]
 }
