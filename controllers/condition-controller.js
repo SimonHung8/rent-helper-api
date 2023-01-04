@@ -7,6 +7,9 @@ const conditionController = {
   },
   deleteCondition: (req, res, next) => {
     conditionService.deleteCondition(req, (err, code, data) => responseHelper(res, next, err, code, data))
+  },
+  getConditions: (req, res, next) => {
+    conditionService.getConditions(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }
 }
 

@@ -41,6 +41,22 @@ const conditionService = {
     } catch (err) {
       cb(err)
     }
+  },
+  getConditions: async (req, cb) => {
+    try {
+      const UserId = req.user.id
+      const conditions = await Condition.findAll({
+        where: {
+          UserId
+        },
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
+        limit: 10,
+        raw: true
+      })
+      return cb(null, 200, { conditions })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 
