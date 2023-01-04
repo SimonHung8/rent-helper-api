@@ -45,7 +45,8 @@ const houseService = {
           KindId: kind.id,
           price,
           ShapeId: shape.id,
-          area
+          area,
+          comment: ''
         }, { transaction: t })
 
         // 物件的照片
@@ -96,8 +97,9 @@ const houseService = {
       const page = parseInt(req.query.page) || 1
       const limit = DEFAULT_LIMIT
       const offset = (page - 1) * limit
+      const UserId = req.user.id
       const houses = await House.findAll({
-        where: { UserId: req.user.id },
+        where: { UserId },
         attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
           [sequelize.literal('(SELECT name FROM Regions WHERE Regions.id = House.Region_id)'), 'region'],
           [sequelize.literal('(SELECT name FROM Sections WHERE Sections.id = House.Section_id)'), 'section'],
@@ -111,6 +113,10 @@ const houseService = {
         offset,
         raw: true,
         nest: true
+      })
+      // 總覽清單只會顯示前30個字
+      houses.forEach(house => {
+        house.comment = house.comment.substring(0, 30)
       })
       return cb(null, 200, { houses })
     } catch (err) {
@@ -143,7 +149,7 @@ const houseService = {
         const errorMessage = errors.errors.map(e => e.msg)
         return cb(null, 400, { message: errorMessage })
       }
-      const { comment } = req.body
+      const comment = req.body.comment || ''
       const id = parseInt(req.params.id)
       const UserId = req.user.id
       if (!id) return cb(null, 400, { message: 'id is required!' })
