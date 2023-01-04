@@ -7,8 +7,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       User.hasMany(models.House, { foreignKey: 'UserId' })
       User.hasMany(models.Condition, { foreignKey: 'UserId' })
-      User.hasMany(models.Expense, { foreignKey: 'UserId' })
-      User.hasMany(models.Meet, { foreignKey: 'UserId' })
     }
   }
   User.init({
