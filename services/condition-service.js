@@ -12,12 +12,13 @@ const conditionService = {
       // 最多設定10筆必備條件
       const DEFAULT_LIMIT = 10
       const UserId = req.user.id
+      const { name } = req.body
       const conditionsCount = await Condition.count({ where: { UserId } })
       if (conditionsCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
       // 建立自定義條件
       const condition = await Condition.create({
         UserId,
-        name: req.body.name
+        name
       })
       return cb(null, 200, { condition: condition.toJSON() })
     } catch (err) {
@@ -33,7 +34,7 @@ const conditionService = {
       if (!condition) return cb(null, 400, { message: '自定義條件不存在' })
       // 刪除condition與關聯的meet
       const deletedCondition = await sequelize.transaction(async t => {
-        await Meet.destroy({ where: { ConditionId: id, UserId }, transaction: t })
+        await Meet.destroy({ where: { ConditionId: id }, transaction: t })
         const result = await condition.destroy({ transaction: t })
         return result
       })
