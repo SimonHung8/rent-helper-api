@@ -33,7 +33,7 @@ const conditionService = {
       if (!condition) return cb(null, 400, { message: '自定義條件不存在' })
       // 刪除condition與關聯的meet
       const deletedCondition = await sequelize.transaction(async t => {
-        await Meet.destroy({ where: { ConditionId: condition.id }, transaction: t })
+        await Meet.destroy({ where: { ConditionId: condition.id, UserId }, transaction: t })
         const result = await condition.destroy({ transaction: t })
         return result
       })
