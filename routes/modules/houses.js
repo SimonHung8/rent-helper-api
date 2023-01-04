@@ -11,5 +11,7 @@ router.get('/:id', authenticated, houseController.getHouse)
 router.get('/', authenticated, houseController.getHouses)
 // 新增收藏物件
 router.post('/', authenticated, houseController.addHouse)
+// 刪除收藏物件
+router.delete('/:id', authenticated, houseController.deleteHouse)
 
 module.exports = router

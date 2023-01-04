@@ -13,6 +13,9 @@ const houseController = {
   },
   editHouseComment: (req, res, next) => {
     houseService.editHouseComment(req, (err, code, data) => responseHelper(res, next, err, code, data))
+  },
+  deleteHouse: (req, res, next) => {
+    houseService.deleteHouse(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }
 }
 

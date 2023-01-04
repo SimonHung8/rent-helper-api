@@ -2,13 +2,13 @@ const fetch = require('node-fetch')
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, Condition, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, Condition, Meet, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
     try {
       const externalId = parseInt(req.body.externalId)
-      if (!externalId) return cb(null, 400, { message: 'externalId is required' })
+      if (!externalId) return cb(null, 400, { message: '物件不存在' })
       // 確認是否建立過該物件的資料
       const isInList = await House.findOne({ where: { externalId } })
       if (isInList) return cb(null, 400, { message: '已收藏的物件' })
@@ -129,7 +129,7 @@ const houseService = {
   getHouse: async (req, cb) => {
     try {
       const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: 'id is required!' })
+      if (!id) return cb(null, 400, { message: '物件不存在' })
       const UserId = req.user.id
       const house = await House.findOne({
         where: { id, UserId },
@@ -177,11 +177,36 @@ const houseService = {
       const comment = req.body.comment || ''
       const id = parseInt(req.params.id)
       const UserId = req.user.id
-      if (!id) return cb(null, 400, { message: 'id is required!' })
+      if (!id) return cb(null, 400, { message: '物件不存在' })
       const house = await House.findOne({ where: { id, UserId } })
       if (!house) return cb(null, 400, { message: '物件不存在' })
       const updatedHouse = await house.update({ comment })
       return cb(null, 200, { house: updatedHouse.toJSON() })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  deleteHouse: async (req, cb) => {
+    try {
+      const id = parseInt(req.params.id)
+      if (!id) return cb(null, 400, { message: '物件不存在' })
+      const UserId = req.user.id
+      const house = await House.findOne({ where: { id, UserId } })
+      if (!house) return cb(null, 400, { message: '物件不存在' })
+      // 刪除house與關聯資料
+      const deletedHouse = await sequelize.transaction(async t => {
+        // 照片
+        await Photo.destroy({ where: { HouseId: id }, transaction: t })
+        // 支出
+        await Expense.destroy({ where: { HouseId: id, UserId }, transaction: t })
+        // 設備
+        await Service.destroy({ where: { HouseId: id }, transaction: t })
+        // 符合條件
+        await Meet.destroy({ where: { HouseId: id, UserId }, transaction: t })
+        const result = await house.destroy({ transaction: t })
+        return result
+      })
+      return cb(null, 200, { house: deletedHouse.toJSON() })
     } catch (err) {
       cb(err)
     }
