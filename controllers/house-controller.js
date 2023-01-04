@@ -8,9 +8,6 @@ const houseController = {
   getHouses: (req, res, next) => {
     houseService.getHouses(req, (err, code, data) => responseHelper(res, next, err, code, data))
   },
-  getHouseExpenses: (req, res, next) => {
-    houseService.getHouseExpenses(req, (err, code, data) => responseHelper(res, next, err, code, data))
-  },
   editHouseComment: (req, res, next) => {
     houseService.editHouseComment(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }

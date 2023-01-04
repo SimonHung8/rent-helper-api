@@ -2,7 +2,7 @@ const fetch = require('node-fetch')
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -123,25 +123,6 @@ const houseService = {
         house.comment = house.comment.substring(0, 30)
       })
       return cb(null, 200, { houses })
-    } catch (err) {
-      cb(err)
-    }
-  },
-  getHouseExpenses: async (req, cb) => {
-    try {
-      const HouseId = parseInt(req.params.id)
-      if (!HouseId) return cb(null, 400, { message: 'id is required!' })
-      const UserId = req.user.id
-      const expenses = await Expense.findAll({
-        where: {
-          HouseId,
-          UserId
-        },
-        attributes: ['id', 'HouseId', 'name', 'price'],
-        order: [['createdAt', 'ASC'], ['id', 'ASC']],
-        raw: true
-      })
-      return cb(null, 200, { expenses })
     } catch (err) {
       cb(err)
     }
