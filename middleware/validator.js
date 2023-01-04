@@ -24,11 +24,12 @@ module.exports = {
   expenseValidator: [
     body('name').isLength({ min: 1, max: 20 }).withMessage('名稱無效'),
     body('price').isInt({ min: 1, max: 9999 }).withMessage('金額無效'),
-    body('HouseId').custom(async HouseId => {
+    body('HouseId').custom(async (HouseId, { req }) => {
       try {
         const id = parseInt(HouseId)
+        const UserId = req.user.id
         if (!id) throw new Error()
-        const house = await House.findByPk(id)
+        const house = await House.findOne({ where: { id, UserId } })
         if (!house) throw new Error()
         return true
       } catch (err) {

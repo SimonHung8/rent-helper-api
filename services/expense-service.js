@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator')
-const { Expense } = require('../models')
+const { Expense, House } = require('../models')
 
 const expenseService = {
   addExpense: async (req, cb) => {
@@ -15,10 +15,8 @@ const expenseService = {
       const expensesCount = await Expense.count({ where: { HouseId } })
       if (expensesCount >= DEFAULT_LIMIT) return cb(null, 400, { message: `不得超過${DEFAULT_LIMIT}筆` })
       // 建立額外支出
-      const UserId = req.user.id
       const expense = await Expense.create({
         HouseId,
-        UserId,
         price,
         name
       })
@@ -31,8 +29,11 @@ const expenseService = {
     const id = parseInt(req.params.id)
     if (!id) return cb(null, 400, { message: '支出不存在' })
     const UserId = req.user.id
-    const expense = await Expense.findOne({ where: { id, UserId } })
+    const expense = await Expense.findByPk(id)
     if (!expense) return cb(null, 400, { message: '支出不存在' })
+    // 檢查是否為使用者的物件
+    const house = await House.findOne({ where: { id: expense.HouseId, UserId } })
+    if (!house) return cb(null, 400, { message: '支出不存在' })
     const deletedExpense = await expense.destroy()
     return cb(null, 200, { expense: deletedExpense.toJSON() })
   }
