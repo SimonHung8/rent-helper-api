@@ -8,12 +8,13 @@ const houseService = {
   addHouse: async (req, cb) => {
     try {
       const externalId = parseInt(req.body.externalId)
+      const UserId = req.user.id
       if (!externalId) return cb(null, 400, { message: '物件不存在' })
       // 確認是否建立過該物件的資料
-      const isInList = await House.findOne({ where: { externalId } })
+      const isInList = await House.findOne({ where: { externalId, UserId } })
       if (isInList) return cb(null, 400, { message: '已收藏的物件' })
 
-      // 設定header
+      // 設定header並請求
       const headers = { 'User-Agent': 'rent-helper', device: 'pc' }
       const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
       headers.deviceid = indexRes.headers.raw()['set-cookie'].find(cookie => cookie.includes('T591_TOKEN'))
@@ -22,28 +23,34 @@ const houseService = {
 
       // 請求失敗
       if (detailRes.status !== 200 || photoRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
-      const detailData = await detailRes.json()
-      const photoData = await photoRes.json()
+
+      const detail = await detailRes.json()
+      const photo = await photoRes.json()
       // 請求成功但沒有資料
-      if (!detailData.status || !photoData.status) return cb(null, 400, { message: '物件不存在' })
+      if (!detail.status || !photo.status) return cb(null, 400, { message: '物件不存在' })
 
       // 驗證是否為支援的物件
-      const region = await Region.findOne({ where: { externalId: detailData.data.regionId }, raw: true })
-      const section = await Section.findOne({ where: { externalId: detailData.data.sectionId }, raw: true })
-      const kind = await Kind.findOne({ where: { externalId: detailData.data.kind }, raw: true })
-      const shape = await Shape.findOne({ where: { name: detailData.data.info.find(i => i.key === 'shape').value }, raw: true })
-      if (!region || !section || !kind || !shape) return cb(null, 400, { message: '服務尚不支援的物件' })
+      const detailData = detail.data
+      const photoData = photo.data
+      const region = await Region.findOne({ where: { externalId: detailData.regionId }, raw: true })
+      if (!region) return cb(null, 400, { message: '服務尚不支援的物件' })
+      const section = await Section.findOne({ where: { externalId: detailData.sectionId }, raw: true })
+      if (!section) return cb(null, 400, { message: '服務尚不支援的物件' })
+      const kind = await Kind.findOne({ where: { externalId: detailData.kind }, raw: true })
+      if (!kind) return cb(null, 400, { message: '服務尚不支援的物件' })
+      const shape = await Shape.findOne({ where: { name: detailData.info.find(i => i.key === 'shape').value }, raw: true })
+      if (!shape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
       // 建立物件資料與擁有的設備
-      const area = detailData.data.info.find(i => i.key === 'area').value
-      const price = parseInt(detailData.data.price.replace(/,/g, ''))
+      const area = detailData.info.find(i => i.key === 'area').value
+      const price = parseInt(detailData.price.replace(/,/g, ''))
 
       const houseData = await sequelize.transaction(async t => {
         // 物件本身的資料
         const result = await House.create({
-          UserId: req.user.id,
+          UserId,
           externalId,
-          name: detailData.data.title,
+          name: detailData.title,
           RegionId: region.id,
           SectionId: section.id,
           KindId: kind.id,
@@ -54,16 +61,16 @@ const houseService = {
         }, { transaction: t })
 
         // 物件的照片
-        const photos = photoData.data.photos.map(photo => ({
+        const photos = photoData.photos.map(item => ({
           HouseId: result.id,
-          url: photo.cutPhoto,
-          isCover: photo.isCover
+          url: item.cutPhoto,
+          isCover: item.isCover
         }))
         await Photo.bulkCreate(photos, { transaction: t })
 
         // 擁有的設備
-        if (!detailData.data.service.facility.length) return result
-        const activeFacilities = detailData.data.service.facility.filter(facility => facility.active).map(item => item.name)
+        if (!detailData.service.facility.length) return result
+        const activeFacilities = detailData.service.facility.filter(facility => facility.active).map(item => item.name)
         const facilities = await Facility.findAll({
           where: { name: { [Op.or]: activeFacilities } },
           attributes: ['id'],
@@ -87,7 +94,7 @@ const houseService = {
       delete house.KindId
       house.shape = shape.name
       delete house.ShapeId
-      house.cover = photoData.data.photos.find(photo => photo.isCover).cutPhoto
+      house.cover = photoData.photos.find(item => item.isCover).cutPhoto
 
       return cb(null, 200, { house })
     } catch (err) {
@@ -129,6 +136,7 @@ const houseService = {
           ),
           { UserId }
         )
+        // 未傳入參數
       } else {
         whereOptions = { UserId }
       }
@@ -230,11 +238,11 @@ const houseService = {
         // 照片
         await Photo.destroy({ where: { HouseId: id }, transaction: t })
         // 支出
-        await Expense.destroy({ where: { HouseId: id, UserId }, transaction: t })
+        await Expense.destroy({ where: { HouseId: id }, transaction: t })
         // 設備
         await Service.destroy({ where: { HouseId: id }, transaction: t })
         // 符合條件
-        await Meet.destroy({ where: { HouseId: id, UserId }, transaction: t })
+        await Meet.destroy({ where: { HouseId: id }, transaction: t })
         const result = await house.destroy({ transaction: t })
         return result
       })
