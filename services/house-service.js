@@ -9,6 +9,10 @@ const houseService = {
     try {
       const externalId = parseInt(req.body.externalId)
       if (!externalId) return cb(null, 400, { message: 'externalId is required' })
+      // 確認是否建立過該物件的資料
+      const isInList = await House.findOne({ where: { externalId } })
+      if (isInList) return cb(null, 400, { message: '已收藏的物件' })
+
       // 設定header
       const headers = { 'User-Agent': 'rent-helper', device: 'pc' }
       const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
