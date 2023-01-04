@@ -5,7 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class House extends Model {
     static associate (models) {
-      House.hasMany(models.Photo, { foreignKey: 'HouseId ' })
+      House.hasMany(models.Photo, { foreignKey: 'HouseId' })
       House.hasMany(models.Expense, { foreignKey: 'HouseId' })
       House.belongsTo(models.User, { foreignKey: 'UserId' })
       House.belongsTo(models.Region, { foreignKey: 'RegionId' })

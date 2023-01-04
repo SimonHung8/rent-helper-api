@@ -2,7 +2,7 @@ const fetch = require('node-fetch')
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
-const { House, Region, Section, Kind, Shape, Photo, Facility, Service, sequelize } = require('../models')
+const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, Condition, sequelize } = require('../models')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -115,14 +115,54 @@ const houseService = {
         order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit,
         offset,
-        raw: true,
-        nest: true
+        raw: true
       })
       // 總覽清單只會顯示前30個字
       houses.forEach(house => {
         house.comment = house.comment.substring(0, 30)
       })
       return cb(null, 200, { houses })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getHouse: async (req, cb) => {
+    try {
+      const id = parseInt(req.params.id)
+      if (!id) return cb(null, 400, { message: 'id is required!' })
+      const UserId = req.user.id
+      const house = await House.findOne({
+        where: { id, UserId },
+        include: [
+          // 照片
+          { model: Photo, attributes: ['id', 'url', 'isCover'] },
+          // 設備
+          { model: Facility, as: 'ServicedFacilities', attributes: ['id', 'name'] },
+          // 支出
+          { model: Expense, attributes: ['id', 'name', 'price'] }
+        ],
+        attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment', 'createdAt',
+          [sequelize.literal('(SELECT name FROM Regions WHERE Regions.id = House.Region_id)'), 'region'],
+          [sequelize.literal('(SELECT name FROM Sections WHERE Sections.id = House.Section_id)'), 'section'],
+          [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.id = House.Kind_id)'), 'kind'],
+          [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.id = House.Shape_id)'), 'shape'],
+          [sequelize.literal('(SELECT SUM(price) FROM Expenses WHERE Expenses.House_id = House.id)'), 'extraExpenses']
+        ],
+        nest: true
+      })
+      if (!house) return cb(null, 400, { message: '物件不存在' })
+
+      // 自定義條件
+      const conditions = await Condition.findAll({
+        where: {
+          UserId
+        },
+        attributes: ['id', 'name',
+          [sequelize.literal(`EXISTS(SELECT true FROM Meets WHERE Meets.User_id = ${UserId} AND Meets.House_id = ${id} AND Meets.Condition_id = Condition.id)`), 'isMet']
+        ],
+        raw: true
+      })
+      return cb(null, 200, { house: house.toJSON(), conditions })
     } catch (err) {
       cb(err)
     }
