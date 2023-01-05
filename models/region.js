@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class Region extends Model {
     static associate (models) {
       Region.hasMany(models.House, { foreignKey: 'RegionId' })
+      Region.hasMany(models.Section, { foreignKey: 'RegionId' })
     }
   }
   Region.init({

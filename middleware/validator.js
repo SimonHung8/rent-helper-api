@@ -42,5 +42,29 @@ module.exports = {
   ],
   commentValidator: [
     body('comment').isLength({ max: 200 }).withMessage('評論無效')
+  ],
+  searchValidator: [
+    body('name').isLength({ min: 1, max: 20 }).withMessage('名稱無效'),
+    body('keyword').isLength({ max: 20 }).withMessage('關鍵字無效'),
+    body('region').isLength({ min: 3, max: 3 }).withMessage('縣市無效'),
+    body('sections').custom(sections => {
+      if (sections.length >= 1 && sections.length <= 5 && new Set(sections).size === sections.length) return true
+      throw new Error()
+    }).withMessage('行政區無效'),
+    body('kind').isLength({ min: 1 }).withMessage('類型無效'),
+    body('shape').isLength({ min: 1 }).withMessage('型態無效'),
+    body('minPrice').isInt({ min: 0, max: 50000 }).withMessage('金額無效'),
+    body('maxPrice').isInt({ min: 0, max: 50000 }).withMessage('金額無效')
+      .bail().custom((maxPrice, { req }) => {
+        if (parseInt(maxPrice) >= parseInt(req.body.minPrice)) return true
+        throw new Error()
+      }).withMessage('金額無效'),
+    body('minArea').isInt({ min: 0, max: 50 }).withMessage('坪數無效'),
+    body('maxArea').isInt({ min: 0, max: 50 }).withMessage('坪數無效')
+      .bail().custom((maxArea, { req }) => {
+        if (parseInt(maxArea) >= parseInt(req.body.minArea)) return true
+        throw new Error()
+      }).withMessage('坪數無效'),
+    body('notCover').isBoolean().withMessage('頂加資訊無效')
   ]
 }
