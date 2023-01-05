@@ -4,10 +4,12 @@
   "PHOTO_URL": "https://bff.591.com.tw/v2/house/photos?type=1&id=",
   "REGION": [
     {
+      "id": 1,
       "external_id": 1,
       "name": "台北市"
     },
     {
+      "id": 2,
       "external_id": 3,
       "name": "新北市"
     }
@@ -15,98 +17,122 @@
   "SECTION": [
     {
       "external_id": 1,
+      "Region_id": 1,
       "name": "中正區"
     },
     {
       "external_id": 2,
+      "Region_id": 1,
       "name": "大同區"
     },
     {
       "external_id": 3,
+      "Region_id": 1,
       "name": "中山區"
     },
     {
       "external_id": 4,
+      "Region_id": 1,
       "name": "松山區"
     },
     {
       "external_id": 5,
+      "Region_id": 1,
       "name": "大安區"
     },
     {
       "external_id": 6,
+      "Region_id": 1,
       "name": "萬華區"
     },
     {
       "external_id": 7,
+      "Region_id": 1,
       "name": "信義區"
     },
     {
       "external_id": 8,
+      "Region_id": 1,
       "name": "士林區"
     },
     {
       "external_id": 9,
+      "Region_id": 1,
       "name": "北投區"
     },
     {
       "external_id": 10,
+      "Region_id": 1,
       "name": "內湖區"
     },
     {
       "external_id": 11,
+      "Region_id": 1,
       "name": "南港區"
     },
     {
       "external_id": 12,
+      "Region_id": 1,
       "name": "文山區"
     },
     {
       "external_id": 26,
+      "Region_id": 2,
       "name": "板橋區"
     },
     {
       "external_id": 27,
+      "Region_id": 2,
       "name": "汐止區"
     },
     {
       "external_id": 34,
+      "Region_id": 2,
       "name": "新店區"
     },
     {
       "external_id": 37,
+      "Region_id": 2,
       "name": "永和區"
     },
     {
       "external_id": 38,
+      "Region_id": 2,
       "name": "中和區"
     },
     {
       "external_id": 39,
+      "Region_id": 2,
       "name": "土城區"
     },
     {
       "external_id": 40,
+      "Region_id": 2,
       "name": "三峽區"
     },
     {
       "external_id": 43,
+      "Region_id": 2,
       "name": "三重區"
     },
     {
       "external_id": 44,
+      "Region_id": 2,
       "name": "新莊區"
     },
     {
       "external_id": 46,
+      "Region_id": 2,
       "name": "林口區"
     },
     {
       "external_id": 47,
+      "Region_id": 2,
       "name": "蘆洲區"
     },
     {
       "external_id": 50,
+      "Region_id": 2,
       "name": "淡水區"
     }
   ],
@@ -126,6 +152,10 @@
     {
       "external_id": 4,
       "name": "雅房"
+    },
+    {
+      "external_id": 0,
+      "name": "不限"
     }
   ],
   "SHAPE": [
@@ -136,6 +166,10 @@
     {
       "external_id": 2,
       "name": "電梯大樓"
+    },
+    {
+      "external_id": 0,
+      "name": "不限"
     }
   ],
   "FACILITY": [
