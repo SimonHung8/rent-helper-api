@@ -9,6 +9,8 @@ router.post('/', authenticated, searchValidator, searchController.addSearch)
 router.get('/:id', authenticated, searchController.getSearch)
 // 取得全部搜尋條件
 router.get('/', authenticated, searchController.getSearches)
+// 編輯搜尋條件
+router.put('/:id', authenticated, searchValidator, searchController.editSearch)
 // 刪除搜尋條件
 router.delete('/:id', authenticated, searchController.deleteSearch)
 

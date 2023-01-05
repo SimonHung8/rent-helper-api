@@ -11,6 +11,9 @@ const searchController = {
   getSearch: (req, res, next) => {
     searchService.getSearch(req, (err, code, data) => responseHelper(res, next, err, code, data))
   },
+  editSearch: (req, res, next) => {
+    searchService.editSearch(req, (err, code, data) => responseHelper(res, next, err, code, data))
+  },
   deleteSearch: (req, res, next) => {
     searchService.deleteSearch(req, (err, code, data) => responseHelper(res, next, err, code, data))
   }
