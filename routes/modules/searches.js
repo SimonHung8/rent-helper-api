@@ -3,7 +3,9 @@ const authenticated = require('../../middleware/auth')
 const searchController = require('../../controllers/search-controller')
 const { searchValidator } = require('../../middleware/validator')
 
-// 符合自定義條件
+// 新增搜尋條件
 router.post('/', authenticated, searchValidator, searchController.addSearch)
+// 刪除搜尋條件
+router.delete('/:id', authenticated, searchController.deleteSearch)
 
 module.exports = router
