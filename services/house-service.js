@@ -181,7 +181,7 @@ const houseService = {
           // 支出
           { model: Expense, attributes: ['id', 'name', 'price'] }
         ],
-        attributes: ['id', 'UserId', 'name', 'price', 'area', 'comment',
+        attributes: ['id', 'UserId', 'externalId', 'name', 'price', 'area', 'comment',
           [sequelize.literal('(SELECT name FROM Regions WHERE Regions.id = House.Region_id)'), 'region'],
           [sequelize.literal('(SELECT name FROM Sections WHERE Sections.id = House.Section_id)'), 'section'],
           [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.id = House.Kind_id)'), 'kind'],
