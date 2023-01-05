@@ -200,7 +200,8 @@ const houseService = {
           UserId
         },
         attributes: ['id', 'name',
-          [sequelize.literal(`EXISTS(SELECT true FROM Meets WHERE Meets.House_id = ${id} AND Meets.Condition_id = Condition.id)`), 'isMet']
+          [sequelize.literal(`EXISTS(SELECT true FROM Meets WHERE Meets.House_id = ${id} AND Meets.Condition_id = Condition.id)`), 'isMet'],
+          [sequelize.literal('(SELECT id FROM Meets WHERE Meets.Condition_id = Condition.id)'), 'meetId']
         ],
         raw: true
       })
