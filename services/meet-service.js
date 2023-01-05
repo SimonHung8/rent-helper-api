@@ -39,6 +39,7 @@ const meetService = {
   deleteMeet: async (req, cb) => {
     try {
       const id = parseInt(req.params.id)
+      if (!id) return cb(null, 400, { message: '條件原本就不符合' })
       const UserId = req.user.id
       const isMet = await Meet.findByPk(id)
       if (!isMet) return cb(null, 400, { message: '條件原本就不符合' })
