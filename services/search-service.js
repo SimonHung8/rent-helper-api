@@ -1,6 +1,6 @@
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
-const { Region, Section, Kind, Shape, Search } = require('../models')
+const { Region, Section, Kind, Shape, Search, sequelize } = require('../models')
 
 const searchService = {
   addSearch: async (req, cb) => {
@@ -77,6 +77,40 @@ const searchService = {
         raw: true
       })
       return cb(null, 200, { searches })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getSearch: async (req, cb) => {
+    try {
+      const id = parseInt(req.params.id)
+      if (!id) return cb(null, 400, { message: '搜尋條件不存在' })
+      const UserId = req.user.id
+      const search = await Search.findOne({
+        where: {
+          id,
+          UserId
+        },
+        attributes: ['id', 'UserId', 'name', 'keyword', 'minPrice', 'maxPrice', 'minArea', 'maxArea', 'notCover', 'sections',
+          [sequelize.literal('(SELECT name FROM Regions WHERE Regions.external_id = Search.region)'), 'region'],
+          [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.external_id = Search.kind)'), 'kind'],
+          [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.external_id = Search.shape)'), 'shape']
+        ],
+        raw: true
+      })
+      if (!search) return cb(null, 400, { message: '搜尋條件不存在' })
+      // 處理行政區資料
+      const sectionsArr = search.sections.split(';')
+      const sections = await Section.findAll({
+        where: {
+          externalId: { [Op.or]: sectionsArr }
+        },
+        attributes: ['name'],
+        raw: true
+      })
+      // 整理回傳資料
+      search.sections = sections.map(item => item.name)
+      return cb(null, 200, { search })
     } catch (err) {
       cb(err)
     }
