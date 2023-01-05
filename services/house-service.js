@@ -86,6 +86,8 @@ const houseService = {
 
       // 整理要回傳的資料
       const house = houseData.toJSON()
+      const conditionsCount = await Condition.count({ where: { UserId } })
+      house.isAllMet = !conditionsCount
       house.region = region.name
       delete house.RegionId
       house.section = section.name
