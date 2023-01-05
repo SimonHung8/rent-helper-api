@@ -64,6 +64,23 @@ const searchService = {
       cb(err)
     }
   },
+  getSearches: async (req, cb) => {
+    try {
+      const UserId = req.user.id
+      const searches = await Search.findAll({
+        where: {
+          UserId
+        },
+        attributes: ['id', 'name'],
+        order: [['createdAt', 'DESC'], ['id', 'ASC']],
+        limit: 5,
+        raw: true
+      })
+      return cb(null, 200, { searches })
+    } catch (err) {
+      cb(err)
+    }
+  },
   deleteSearch: async (req, cb) => {
     try {
       const id = parseInt(req.params.id)
