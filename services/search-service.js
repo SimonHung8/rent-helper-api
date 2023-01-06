@@ -71,11 +71,32 @@ const searchService = {
         where: {
           UserId
         },
-        attributes: ['id', 'name'],
+        attributes: ['id', 'UserId', 'name', 'keyword', 'minPrice', 'maxPrice', 'minArea', 'maxArea', 'notCover', 'sections',
+          [sequelize.literal('(SELECT name FROM Regions WHERE Regions.external_id = Search.region)'), 'region'],
+          [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.external_id = Search.kind)'), 'kind'],
+          [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.external_id = Search.shape)'), 'shape']
+        ],
         order: [['createdAt', 'DESC'], ['id', 'ASC']],
         limit: 5,
         raw: true
       })
+      if (!searches.length) return cb(null, 200, { searches })
+
+      // 處理行政區資料
+      searches.forEach(search => {
+        search.sections = search.sections.split(';')
+      })
+      for (const search of searches) {
+        const sections = await Section.findAll({
+          where: {
+            externalId: { [Op.or]: search.sections }
+          },
+          attributes: ['name'],
+          raw: true
+        })
+        search.sections = sections.map(item => item.name)
+      }
+
       return cb(null, 200, { searches })
     } catch (err) {
       cb(err)
