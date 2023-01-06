@@ -1,5 +1,6 @@
 {
   "INDEX_URL": "https://rent.591.com.tw",
+  "TARGET_URL": "https://rent.591.com.tw/home/search/rsList?is_format_data=1&is_new_list=1&type=1&searchtype=1&order=posttime&orderType=desc",
   "DETAIL_URL": "https://bff.591.com.tw/v1/house/rent/detail?id=",
   "PHOTO_URL": "https://bff.591.com.tw/v2/house/photos?type=1&id=",
   "REGION": [

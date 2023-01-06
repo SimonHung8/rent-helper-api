@@ -1,5 +1,8 @@
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
+const fetch = require('node-fetch')
+const HTMLParser = require('node-html-parser')
+const root = require('../config/root.json')
 const { Region, Section, Kind, Shape, Search, sequelize } = require('../models')
 
 const searchService = {
@@ -37,6 +40,40 @@ const searchService = {
       const isSupportedShape = await Shape.findOne({ where: { name: shape }, raw: true })
       if (!isSupportedShape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
+      // 設定header
+      const headers = { 'User-Agent': 'rent-helper' }
+      const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
+      headers.cookie = `urlJumpIp=${isSupportedRegion.externalId};`
+      headers.cookie += `urlJumpIpByTxt=${encodeURI(isSupportedRegion.name)};`
+      headers.cookie += indexRes.headers.raw()['set-cookie'].find(cookie => cookie.includes('591_new_session'))
+      const text = await indexRes.text()
+      const body = HTMLParser.parse(text)
+      headers['X-CSRF-TOKEN'] = body.querySelector('meta[name="csrf-token"]').attrs.content
+      // 設定要請求的網址
+      let targetURL = root.TARGET_URL
+      targetURL += `&region=${isSupportedRegion.externalId}`
+      targetURL += `&section=${isSupportedSections.map(item => item.externalId).join(',')}`
+      if (isSupportedKind.externalId) {
+        targetURL += `&kind=${isSupportedKind.externalId}`
+      }
+      if (isSupportedShape.externalId) {
+        targetURL += `&shape=${isSupportedShape.externalId}`
+      }
+      if (keyword) {
+        targetURL += `&keywords=${encodeURI(keyword)}`
+      }
+      targetURL += `&area=${minArea},${maxArea}`
+      targetURL += `&rentprice=${minPrice}, ${maxPrice}`
+      if (notCover) {
+        targetURL += '&multiNotice=not_cover'
+      }
+      const targetRes = await fetch(targetURL, { headers })
+      // 請求失敗
+      if (targetRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
+      const targetData = await targetRes.json()
+      // 請求成功但沒有資料
+      if (!targetData.status) return cb(null, 400, { message: '找不到符合物件' })
+
       // 建立搜尋條件，整理成爬蟲需要的格式
       const searchData = await Search.create({
         name,
@@ -50,7 +87,8 @@ const searchService = {
         maxPrice,
         minArea,
         maxArea,
-        notCover
+        notCover,
+        results: targetData.data.data.map(item => item.post_id).join(';')
       })
 
       // 整理要回傳的資料
@@ -59,6 +97,7 @@ const searchService = {
       search.sections = sections
       search.kind = kind
       search.shape = shape
+      delete search.results
       return cb(null, 200, { search })
     } catch (err) {
       cb(err)

@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     maxPrice: DataTypes.INTEGER,
     minArea: DataTypes.INTEGER,
     maxArea: DataTypes.INTEGER,
-    notCover: DataTypes.BOOLEAN
+    notCover: DataTypes.BOOLEAN,
+    results: DataTypes.TEXT
   }, {
     sequelize,
     modelName: 'Search',
