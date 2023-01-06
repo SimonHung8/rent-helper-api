@@ -5,6 +5,7 @@ const expenses = require('./modules/expenses')
 const conditions = require('./modules/conditions')
 const meets = require('./modules/meets')
 const searches = require('./modules/searches')
+const lineAuth = require('./modules/line-auth')
 
 router.use('/users', users)
 router.use('/houses', houses)
@@ -12,5 +13,6 @@ router.use('/expenses', expenses)
 router.use('/conditions', conditions)
 router.use('/meets', meets)
 router.use('/searches', searches)
+router.use('/lineAuth', lineAuth)
 
 module.exports = router
