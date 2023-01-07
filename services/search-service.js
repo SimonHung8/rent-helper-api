@@ -1,9 +1,8 @@
 const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
 const fetch = require('node-fetch')
-const HTMLParser = require('node-html-parser')
-const root = require('../config/root.json')
 const { Region, Section, Kind, Shape, Search, sequelize } = require('../models')
+const scrapeHelper = require('../helpers/scrape-helper')
 
 const searchService = {
   addSearch: async (req, cb) => {
@@ -13,6 +12,8 @@ const searchService = {
         const errorMessage = errors.errors.map(e => e.msg)
         return cb(null, 400, { message: errorMessage })
       }
+      // 如果使用者還沒建立line token
+      if (!req.user.token) return cb(null, 400, { message: 'line尚未驗證' })
       // 最多只能有5條搜尋清單
       const DEFAULT_LIMIT = 5
       const UserId = req.user.id
@@ -41,57 +42,46 @@ const searchService = {
       if (!isSupportedShape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
       // 設定header
-      const headers = { 'User-Agent': 'rent-helper' }
-      const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
-      // header請求失敗
-      if (indexRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
-
-      headers.cookie = `urlJumpIp=${isSupportedRegion.externalId};`
+      const headers = await scrapeHelper.setListHeader()
+      headers.cookie += `;urlJumpIp=${isSupportedRegion.externalId};`
       headers.cookie += `urlJumpIpByTxt=${encodeURI(isSupportedRegion.name)};`
-      headers.cookie += indexRes.headers.raw()['set-cookie'].find(cookie => cookie.includes('591_new_session'))
-      const text = await indexRes.text()
-      const body = HTMLParser.parse(text)
-      headers['X-CSRF-TOKEN'] = body.querySelector('meta[name="csrf-token"]').attrs.content
+
       // 設定要請求的網址
-      let targetURL = root.TARGET_URL
-      targetURL += `&region=${isSupportedRegion.externalId}`
-      targetURL += `&section=${isSupportedSections.map(item => item.externalId).join(',')}`
-      if (isSupportedKind.externalId) {
-        targetURL += `&kind=${isSupportedKind.externalId}`
+      const target = {
+        region: isSupportedRegion.externalId,
+        sections: isSupportedSections.map(item => item.externalId).join(','),
+        kind: isSupportedKind.externalId,
+        shape: isSupportedShape.externalId,
+        keyword,
+        minArea,
+        maxArea,
+        minPrice,
+        maxPrice,
+        notCover
       }
-      if (isSupportedShape.externalId) {
-        targetURL += `&shape=${isSupportedShape.externalId}`
-      }
-      if (keyword) {
-        targetURL += `&keywords=${encodeURI(keyword)}`
-      }
-      targetURL += `&area=${minArea},${maxArea}`
-      targetURL += `&rentprice=${minPrice}, ${maxPrice}`
-      if (notCover) {
-        targetURL += '&multiNotice=not_cover'
-      }
+
+      const targetURL = scrapeHelper.setTargetURL(target)
       const targetRes = await fetch(targetURL, { headers })
       // 請求失敗
       if (targetRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
       const targetData = await targetRes.json()
-      // 請求成功但沒有資料
+      // 請求成功但這個搜尋條件沒有資料
       if (!targetData.status) return cb(null, 400, { message: '找不到符合物件' })
-
-      // 建立搜尋條件，整理成爬蟲需要的格式
+      // 建立搜尋條件
       const searchData = await Search.create({
         name,
         UserId,
         keyword: keyword || '',
-        region: isSupportedRegion.externalId,
-        sections: isSupportedSections.map(item => item.externalId).join(';'),
-        kind: isSupportedKind.externalId,
-        shape: isSupportedShape.externalId,
+        region: target.region,
+        sections: target.sections,
+        kind: target.kind,
+        shape: target.shape,
         minPrice,
         maxPrice,
         minArea,
         maxArea,
         notCover,
-        results: targetData.data.data.map(item => item.post_id).join(';')
+        results: targetData.data.data.map(item => item.post_id).join(',')
       })
 
       // 整理要回傳的資料
@@ -126,7 +116,7 @@ const searchService = {
 
       // 處理行政區資料
       searches.forEach(search => {
-        search.sections = search.sections.split(';')
+        search.sections = search.sections.split(',')
       })
       for (const search of searches) {
         const sections = await Section.findAll({
@@ -140,40 +130,6 @@ const searchService = {
       }
 
       return cb(null, 200, { searches })
-    } catch (err) {
-      cb(err)
-    }
-  },
-  getSearch: async (req, cb) => {
-    try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '搜尋條件不存在' })
-      const UserId = req.user.id
-      const search = await Search.findOne({
-        where: {
-          id,
-          UserId
-        },
-        attributes: ['id', 'UserId', 'name', 'keyword', 'minPrice', 'maxPrice', 'minArea', 'maxArea', 'notCover', 'sections',
-          [sequelize.literal('(SELECT name FROM Regions WHERE Regions.external_id = Search.region)'), 'region'],
-          [sequelize.literal('(SELECT name FROM Kinds WHERE Kinds.external_id = Search.kind)'), 'kind'],
-          [sequelize.literal('(SELECT name FROM Shapes WHERE Shapes.external_id = Search.shape)'), 'shape']
-        ],
-        raw: true
-      })
-      if (!search) return cb(null, 400, { message: '搜尋條件不存在' })
-      // 處理行政區資料
-      const sectionsArr = search.sections.split(';')
-      const sections = await Section.findAll({
-        where: {
-          externalId: { [Op.or]: sectionsArr }
-        },
-        attributes: ['name'],
-        raw: true
-      })
-      // 整理回傳資料
-      search.sections = sections.map(item => item.name)
-      return cb(null, 200, { search })
     } catch (err) {
       cb(err)
     }
@@ -213,20 +169,47 @@ const searchService = {
       const isSupportedShape = await Shape.findOne({ where: { name: shape }, raw: true })
       if (!isSupportedShape) return cb(null, 400, { message: '服務尚不支援的物件' })
 
-      // 建立搜尋條件，整理成爬蟲需要的格式
+      // 設定header
+      const headers = await scrapeHelper.setListHeader()
+      headers.cookie += `;urlJumpIp=${isSupportedRegion.externalId};`
+      headers.cookie += `urlJumpIpByTxt=${encodeURI(isSupportedRegion.name)};`
+
+      // 設定要請求的網址
+      const target = {
+        region: isSupportedRegion.externalId,
+        sections: isSupportedSections.map(item => item.externalId).join(','),
+        kind: isSupportedKind.externalId,
+        shape: isSupportedShape.externalId,
+        keyword,
+        minArea,
+        maxArea,
+        minPrice,
+        maxPrice,
+        notCover
+      }
+      const targetURL = scrapeHelper.setTargetURL(target)
+      const targetRes = await fetch(targetURL, { headers })
+      // 請求失敗
+      if (targetRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
+      const targetData = await targetRes.json()
+      // 請求成功但這個搜尋條件沒有資料
+      if (!targetData.status) return cb(null, 400, { message: '找不到符合物件' })
+
+      // 更新搜尋條件
       const searchData = await isSearchExisted.update({
         name,
         UserId,
         keyword: keyword || '',
-        region: isSupportedRegion.externalId,
-        sections: isSupportedSections.map(item => item.externalId).join(';'),
-        kind: isSupportedKind.externalId,
-        shape: isSupportedShape.externalId,
+        region: target.region,
+        sections: target.sections,
+        kind: target.kind,
+        shape: target.shape,
         minPrice,
         maxPrice,
         minArea,
         maxArea,
-        notCover
+        notCover,
+        results: targetData.data.data.map(item => item.post_id).join(',')
       })
 
       // 整理要回傳的資料
@@ -235,6 +218,8 @@ const searchService = {
       search.sections = sections
       search.kind = kind
       search.shape = shape
+      delete search.results
+
       return cb(null, 200, { search })
     } catch (err) {
       cb(err)

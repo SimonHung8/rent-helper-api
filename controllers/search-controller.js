@@ -8,9 +8,6 @@ const searchController = {
   getSearches: (req, res, next) => {
     searchService.getSearches(req, (err, code, data) => responseHelper(res, next, err, code, data))
   },
-  getSearch: (req, res, next) => {
-    searchService.getSearch(req, (err, code, data) => responseHelper(res, next, err, code, data))
-  },
   editSearch: (req, res, next) => {
     searchService.editSearch(req, (err, code, data) => responseHelper(res, next, err, code, data))
   },

@@ -5,8 +5,6 @@ const { searchValidator } = require('../../middleware/validator')
 
 // 新增搜尋條件
 router.post('/', authenticated, searchValidator, searchController.addSearch)
-// 取得單一搜尋條件
-router.get('/:id', authenticated, searchController.getSearch)
 // 取得全部搜尋條件
 router.get('/', authenticated, searchController.getSearches)
 // 編輯搜尋條件

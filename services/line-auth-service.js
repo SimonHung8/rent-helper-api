@@ -1,6 +1,5 @@
 const fetch = require('node-fetch')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const { User } = require('../models')
 
 const lineAuthService = {
@@ -27,9 +26,7 @@ const lineAuthService = {
       const tokenData = await tokenResp.json()
       if (tokenData.status !== 200) throw new Error()
       const token = tokenData.access_token
-      const salt = await bcrypt.genSalt(10)
-      const hash = await bcrypt.hash(token, salt)
-      await isUserExisted.update({ token: hash })
+      await isUserExisted.update({ token })
       return cb(null)
     } catch (err) {
       cb(err)
