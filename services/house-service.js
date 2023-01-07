@@ -3,6 +3,7 @@ const { Op } = require('sequelize')
 const { validationResult } = require('express-validator')
 const root = require('../config/root.json')
 const { House, Region, Section, Kind, Shape, Photo, Facility, Service, Expense, Condition, Meet, sequelize } = require('../models')
+const scrapeHelper = require('../helpers/scrape-helper')
 
 const houseService = {
   addHouse: async (req, cb) => {
@@ -15,12 +16,7 @@ const houseService = {
       if (isInList) return cb(null, 400, { message: '已收藏的物件' })
 
       // 設定header並請求
-      const headers = { 'User-Agent': 'rent-helper', device: 'pc' }
-      const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
-      // header請求失敗
-      if (indexRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
-
-      headers.deviceid = indexRes.headers.raw()['set-cookie'].find(cookie => cookie.includes('T591_TOKEN'))
+      const headers = await scrapeHelper.setDetailHeader()
       const detailRes = await fetch(`${root.DETAIL_URL}${externalId}`, { headers })
       const photoRes = await fetch(`${root.PHOTO_URL}${externalId}`, { headers })
 
