@@ -43,6 +43,9 @@ const searchService = {
       // 設定header
       const headers = { 'User-Agent': 'rent-helper' }
       const indexRes = await fetch(`${root.INDEX_URL}`, { headers })
+      // header請求失敗
+      if (indexRes.status !== 200) throw new Error('爬不到資料，快來檢查一下')
+
       headers.cookie = `urlJumpIp=${isSupportedRegion.externalId};`
       headers.cookie += `urlJumpIpByTxt=${encodeURI(isSupportedRegion.name)};`
       headers.cookie += indexRes.headers.raw()['set-cookie'].find(cookie => cookie.includes('591_new_session'))
