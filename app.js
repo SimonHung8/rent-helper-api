@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const routes = require('./routes')
+const cronStart = require('./helpers/cron-helper')
 const { errorHandler, undefinedRoutes } = require('./middleware/error-handler')
 
 const app = express()
@@ -16,3 +17,5 @@ app.use(errorHandler)
 app.use('*', undefinedRoutes)
 
 app.listen(3000, () => console.log('Rent Helper starts'))
+
+cronStart()
