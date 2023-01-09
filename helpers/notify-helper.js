@@ -9,7 +9,7 @@ module.exports = async (name, results, token) => {
         'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Bearer ${token}`
       },
-      body: `message=有新的物件囉《${name}》!${message}`,
+      body: `message=有新的物件囉！《${name}》${message}`,
       method: 'POST'
     })
   } catch (err) {
