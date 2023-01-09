@@ -10,6 +10,7 @@ module.exports = async () => {
       const searches = await Search.findAll()
       if (!searches.length) return
       for (const search of searches) {
+        console.log(search.name)
         // 設定header
         console.log('setting header')
         const headers = await scrapeHelper.setListHeader()
