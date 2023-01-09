@@ -8,6 +8,7 @@ module.exports = async () => {
   cron.schedule(process.env.FREQUENCY, async () => {
     try {
       const searches = await Search.findAll()
+      console.log(searches.length)
       if (!searches.length) return
       for (const search of searches) {
         console.log(search.name)
