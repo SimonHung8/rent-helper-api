@@ -14,5 +14,8 @@ router.use('/conditions', conditions)
 router.use('/meets', meets)
 router.use('/searches', searches)
 router.use('/lineAuth', lineAuth)
+router.use('/uptimeRobot', (req, res) => {
+  res.status(200).json({ message: 'avoid sleeping' })
+})
 
 module.exports = router

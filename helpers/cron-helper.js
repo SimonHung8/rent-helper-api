@@ -5,7 +5,7 @@ const notifyHelper = require('./notify-helper')
 const scrapeHelper = require('./scrape-helper')
 
 module.exports = async () => {
-  cron.schedule('*/15 * * * *', async () => {
+  cron.schedule(process.env.FREQUENCY, async () => {
     try {
       const searches = await Search.findAll()
       if (!searches.length) return
