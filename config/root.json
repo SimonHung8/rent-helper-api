@@ -3,7 +3,7 @@
   "TARGET_URL": "https://rent.591.com.tw/home/search/rsList?is_format_data=1&is_new_list=1&type=1&searchtype=1&order=posttime&orderType=desc",
   "DETAIL_URL": "https://bff.591.com.tw/v1/house/rent/detail?id=",
   "PHOTO_URL": "https://bff.591.com.tw/v2/house/photos?type=1&id=",
-  "HOME_URL":"https://rent.591.com.tw/home/",
+  "HOME_URL": "https://rent.591.com.tw/home/",
   "REGION": [
     {
       "id": 1,
@@ -156,6 +156,14 @@
       "name": "雅房"
     },
     {
+      "external_id": 8,
+      "name": "車位"
+    },
+    {
+      "external_id": 24,
+      "name": "其他"
+    },
+    {
       "external_id": 0,
       "name": "不限"
     }
@@ -168,6 +176,14 @@
     {
       "external_id": 2,
       "name": "電梯大樓"
+    },
+    {
+      "external_id": 3,
+      "name": "透天厝"
+    },
+    {
+      "external_id": 4,
+      "name": "別墅"
     },
     {
       "external_id": 0,
