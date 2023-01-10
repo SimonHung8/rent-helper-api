@@ -26,8 +26,7 @@ const expenseService = {
     }
   },
   deleteExpense: async (req, cb) => {
-    const id = parseInt(req.params.id)
-    if (!id) return cb(null, 400, { message: '支出不存在' })
+    const id = req.params.id
     const UserId = req.user.id
     const expense = await Expense.findByPk(id)
     if (!expense) return cb(null, 400, { message: '支出不存在' })

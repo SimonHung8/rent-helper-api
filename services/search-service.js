@@ -142,8 +142,7 @@ const searchService = {
         return cb(null, 400, { message: errorMessage })
       }
 
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '搜尋條件不存在' })
+      const id = req.params.id
       const UserId = req.user.id
       const isSearchExisted = await Search.findOne({ where: { id, UserId } })
       if (!isSearchExisted) return cb(null, 400, { message: '搜尋條件不存在' })
@@ -227,8 +226,7 @@ const searchService = {
   },
   deleteSearch: async (req, cb) => {
     try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '搜尋條件不存在' })
+      const id = req.params.id
       const UserId = req.user.id
       const searchData = await Search.findOne({ where: { id, UserId } })
       if (!searchData) return cb(null, 400, { message: '搜尋條件不存在' })

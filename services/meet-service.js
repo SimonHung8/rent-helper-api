@@ -3,10 +3,8 @@ const { House, Condition, Meet } = require('../models')
 const meetService = {
   addMeet: async (req, cb) => {
     try {
-      const HouseId = parseInt(req.body.HouseId)
-      const ConditionId = parseInt(req.body.ConditionId)
+      const { HouseId, ConditionId } = req.body
       const UserId = req.user.id
-      if (!HouseId || !ConditionId) return cb(null, 400, { message: '物件或自定義條件不存在' })
 
       // 反查house與condition
       const house = await House.findOne({
@@ -38,8 +36,7 @@ const meetService = {
   },
   deleteMeet: async (req, cb) => {
     try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '條件原本就不符合' })
+      const id = req.params.id
       const UserId = req.user.id
       const isMet = await Meet.findByPk(id)
       if (!isMet) return cb(null, 400, { message: '條件原本就不符合' })

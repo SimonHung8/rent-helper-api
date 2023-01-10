@@ -27,8 +27,7 @@ const conditionService = {
   },
   deleteCondition: async (req, cb) => {
     try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '自定義條件不存在' })
+      const id = req.params.id
       const UserId = req.user.id
       const condition = await Condition.findOne({ where: { id, UserId } })
       if (!condition) return cb(null, 400, { message: '自定義條件不存在' })

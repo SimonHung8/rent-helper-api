@@ -26,9 +26,8 @@ module.exports = {
     body('price').isInt({ min: 1, max: 9999 }).withMessage('金額無效'),
     body('HouseId').custom(async (HouseId, { req }) => {
       try {
-        const id = parseInt(HouseId)
+        const id = HouseId
         const UserId = req.user.id
-        if (!id) throw new Error()
         const house = await House.findOne({ where: { id, UserId } })
         if (!house) throw new Error()
         return true
@@ -56,13 +55,13 @@ module.exports = {
     body('minPrice').isInt({ min: 0, max: 50000 }).withMessage('金額無效'),
     body('maxPrice').isInt({ min: 0, max: 50000 }).withMessage('金額無效')
       .bail().custom((maxPrice, { req }) => {
-        if (parseInt(maxPrice) >= parseInt(req.body.minPrice)) return true
+        if (parseInt(maxPrice, 10) >= parseInt(req.body.minPrice, 10)) return true
         throw new Error()
       }).withMessage('金額無效'),
     body('minArea').isInt({ min: 0, max: 50 }).withMessage('坪數無效'),
     body('maxArea').isInt({ min: 0, max: 50 }).withMessage('坪數無效')
       .bail().custom((maxArea, { req }) => {
-        if (parseInt(maxArea) >= parseInt(req.body.minArea)) return true
+        if (parseInt(maxArea, 10) >= parseInt(req.body.minArea, 10)) return true
         throw new Error()
       }).withMessage('坪數無效'),
     body('notCover').isBoolean().withMessage('頂加資訊無效')

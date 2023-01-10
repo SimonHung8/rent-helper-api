@@ -8,9 +8,8 @@ const scrapeHelper = require('../helpers/scrape-helper')
 const houseService = {
   addHouse: async (req, cb) => {
     try {
-      const externalId = parseInt(req.body.externalId)
+      const externalId = req.body.externalId
       const UserId = req.user.id
-      if (!externalId) return cb(null, 400, { message: '物件不存在' })
       // 確認是否建立過該物件的資料
       const isInList = await House.findOne({ where: { externalId, UserId } })
       if (isInList) return cb(null, 400, { message: '已收藏的物件' })
@@ -42,7 +41,7 @@ const houseService = {
 
       // 建立物件資料與擁有的設備
       const area = detailData.info.find(i => i.key === 'area').value
-      const price = parseInt(detailData.price.replace(/,/g, ''))
+      const price = detailData.price.replace(/,/g, '')
 
       const houseData = await sequelize.transaction(async t => {
         // 物件本身的資料
@@ -106,7 +105,7 @@ const houseService = {
     try {
       // 每次回傳10筆資料
       const DEFAULT_LIMIT = 10
-      const page = parseInt(req.query.page) || 1
+      const page = req.query.page || 1
       const limit = DEFAULT_LIMIT
       const offset = (page - 1) * limit
       const UserId = req.user.id
@@ -169,8 +168,7 @@ const houseService = {
   },
   getHouse: async (req, cb) => {
     try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '物件不存在' })
+      const id = req.params.id
       const UserId = req.user.id
       const house = await House.findOne({
         where: { id, UserId },
@@ -216,9 +214,8 @@ const houseService = {
         return cb(null, 400, { message: errorMessage })
       }
       const comment = req.body.comment || ''
-      const id = parseInt(req.params.id)
+      const id = req.params.id
       const UserId = req.user.id
-      if (!id) return cb(null, 400, { message: '物件不存在' })
       const house = await House.findOne({ where: { id, UserId } })
       if (!house) return cb(null, 400, { message: '物件不存在' })
       const updatedHouse = await house.update({ comment })
@@ -229,8 +226,7 @@ const houseService = {
   },
   deleteHouse: async (req, cb) => {
     try {
-      const id = parseInt(req.params.id)
-      if (!id) return cb(null, 400, { message: '物件不存在' })
+      const id = req.params.id
       const UserId = req.user.id
       const house = await House.findOne({ where: { id, UserId } })
       if (!house) return cb(null, 400, { message: '物件不存在' })
