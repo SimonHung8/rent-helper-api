@@ -2,6 +2,9 @@ const path = require('path')
 const lineAuthService = require('../services/line-auth-service')
 
 const lineAuthController = {
+  failRedirect: (req, res) => {
+    return res.redirect('https://y0000ga.github.io/rent-helper/')
+  },
   getToken: (req, res) => {
     lineAuthService.getToken(req, (err) => {
       if (err) {
