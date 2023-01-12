@@ -14,6 +14,18 @@ const lineAuthService = {
       const tokenData = await tokenResp.json()
       if (tokenData.status !== 200) throw new Error('line server error')
       const token = tokenData.access_token
+      // 測試帳號訊息
+      if (user.account === process.env.TEST_ACCOUNT) {
+        await fetch('https://notify-api.line.me/api/notify', {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Bearer ${token}`
+          },
+          body: 'message=這是測試帳號，若要使用Line通知服務，請自行註冊帳號密碼',
+          method: 'POST'
+        })
+        return cb(null)
+      }
       await user.update({ token })
       return cb(null)
     } catch (err) {
