@@ -24,10 +24,10 @@ const lineAuthService = {
           body: 'message=這是測試帳號，若要使用Line通知服務，請自行註冊帳號密碼',
           method: 'POST'
         })
-        return cb(null)
+        return cb(null, { isTestAccount: true })
       }
       await user.update({ token })
-      return cb(null)
+      return cb(null, { isTestAccount: false })
     } catch (err) {
       cb(err)
     }
