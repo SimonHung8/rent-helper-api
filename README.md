@@ -17,8 +17,8 @@ Rent Helper API 是一個使用 Node.js, Express, MySQL, LineNotify打造的後�
 ## 測試帳號
 測試帳號密碼 **(已和其他 Line 帳號連結，故僅供平台操作，若需要使用 Line 通知服務，請自行註冊新的帳號密碼)**
 ```
-帳號：testuser
-密碼：Testuser1!
+帳號：user1
+密碼：User1
 ```
 
 ## 專案功能
