@@ -6,8 +6,8 @@ const lineAuthService = {
   getToken: async (req, cb) => {
     try {
       const { code, state } = req.body
-      const id = jwt.verify(state, process.env.LINE_AUTH_SECRET)
-      const user = await User.findByPk(id)
+      const data = jwt.verify(state, process.env.LINE_AUTH_SECRET)
+      const user = await User.findByPk(data.id)
       if (!user) throw new Error('使用者資訊錯誤')
       const tokenResp = await fetch(`https://notify-bot.line.me/oauth/token?grant_type=authorization_code&code=${code}&client_id=${process.env.LINE_CLIENT_ID}&client_secret=${process.env.LINE_CLIENT_SECRET}&redirect_uri=${process.env.LINE_REDIRECT_URI}`, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
