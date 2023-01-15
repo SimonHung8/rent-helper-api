@@ -46,6 +46,11 @@ const userService = {
     } catch (err) {
       cb(err)
     }
+  },
+  getLineAuthLink: (req, cb) => {
+    const id = req.user.id
+    const state = jwt.sign(id, process.env.LINE_AUTH_SECRET)
+    return cb(null, 200, { link: `https://notify-bot.line.me/oauth/authorize?response_type=code&scope=notify&response_mode=form_post&client_id=${process.env.LINE_CLIENT_ID}&redirect_uri=${process.env.LINE_REDIRECT_URI}&state=${state}` })
   }
 }
 

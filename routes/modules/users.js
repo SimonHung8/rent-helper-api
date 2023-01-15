@@ -4,7 +4,7 @@ const authenticated = require('../../middleware/auth')
 const { registerValidator } = require('../../middleware/validator')
 
 // 使用者驗證line
-router.get('/lineAuth', authenticated, userController.getLineAuth)
+router.get('/lineAuth', authenticated, userController.getLineAuthLink)
 // 使用者登入
 router.post('/login', userController.login)
 // 使用者註冊
