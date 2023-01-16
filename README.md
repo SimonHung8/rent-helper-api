@@ -1,6 +1,6 @@
 # Rent Helper API
 
-### [Rent Helper - 租屋小幫手](https://y0000ga.github.io/rent-helper/)
+### Demo頁面: [Rent Helper - 租屋小幫手](https://y0000ga.github.io/rent-helper/)
 
 Rent Helper API 是一個使用 Node.js, Express, MySQL, LineNotify打造的後端專案，搭配前端專案 [Rent Helper](https://github.com/y0000ga/rent-helper)，讓使用者能在Line上接收最新的591租屋資訊，並可在網站上收藏感興趣的物件。
 ### 【Line通知】
@@ -73,13 +73,15 @@ npm install
 4. 依照.env.example設定環境變數.env
 
 ```
-JWT_SECRET=<your JWT secret>
+JWT_SECRET=<your JWT secret for user auth>
+LINE_AUTH_SECRET=<your JWT secret for line notify auth>
 LINE_CLIENT_ID=<your Line notify client id>
 LINE_CLIENT_SECRET=<your line notify client secret>
 LINE_REDIRECT_URI=<your line notify redirect URI>
 FRONTEND_ORIGIN=<前端網域>
 PORT=<本地運行的port>
 FREQUENCY=<對591請求的頻率> //請使用cron的格式，建議最少以分鐘為單位
+TEST_ACCOUNT=<測試帳號> //如果有設置測試帳號
 ```
 5. 打開MySQL Workbench建立資料庫
 
