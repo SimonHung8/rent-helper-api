@@ -1,8 +1,10 @@
 const cron = require('node-cron')
 const fetch = require('node-fetch')
-const { User, Search } = require('../models')
+const { User, Search, Region } = require('../models')
 const notifyHelper = require('./notify-helper')
 const scrapeHelper = require('./scrape-helper')
+
+const regions = await Region.findAll({ raw: true })
 
 module.exports = async () => {
   cron.schedule(process.env.FREQUENCY, async () => {
@@ -13,12 +15,8 @@ module.exports = async () => {
         // 設定header
         const headers = await scrapeHelper.setListHeader()
         headers.cookie += `;urlJumpIp=${search.region};`
-        if (search.region === 1) {
-          headers.cookie += `urlJumpIpByTxt=${encodeURI('台北市')};`
-        }
-        if (search.region === 3) {
-          headers.cookie += `urlJumpIpByTxt=${encodeURI('新北市')};`
-        }
+        const regionName = regions.find(region => region.externalId === search.region).name
+        headers.cookie += `urlJumpIpByTxt=${encodeURI(regionName)};`
         // 設定要請求的網址
         const targetURL = scrapeHelper.setTargetURL(search)
         const targetRes = await fetch(targetURL, { headers })
