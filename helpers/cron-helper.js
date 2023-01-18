@@ -4,12 +4,11 @@ const { User, Search, Region } = require('../models')
 const notifyHelper = require('./notify-helper')
 const scrapeHelper = require('./scrape-helper')
 
-const regions = await Region.findAll({ raw: true })
-
 module.exports = async () => {
   cron.schedule(process.env.FREQUENCY, async () => {
     try {
       const searches = await Search.findAll()
+      const regions = await Region.findAll({ raw: true })
       if (!searches.length) return
       for (const search of searches) {
         // 設定header
