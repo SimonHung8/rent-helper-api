@@ -1,6 +1,7 @@
 # Rent Helper API
 
 ### 網站入口: [Rent Helper - 租屋小幫手](https://y0000ga.github.io/rent-helper/)
+![website image](./public/readme-images/image.jpg)
 
 Rent Helper API 是一個使用 Node.js, Express, MySQL, LineNotify打造的後端專案，搭配前端專案 [Rent Helper](https://github.com/y0000ga/rent-helper)，讓使用者能在Line上接收最新的591租屋資訊，並可在網站上收藏感興趣的物件。
 ### 【Line通知】
