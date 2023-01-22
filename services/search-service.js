@@ -68,6 +68,7 @@ const searchService = {
       // 請求成功但這個搜尋條件沒有資料
       if (!targetData.status) return cb(null, 400, { message: '找不到符合物件' })
       // 建立搜尋條件
+      const resultsLength = 20
       const searchData = await Search.create({
         name,
         UserId,
@@ -81,7 +82,7 @@ const searchService = {
         minArea,
         maxArea,
         notCover,
-        results: targetData.data.data.map(item => item.post_id).slice(0, 20).join(',')
+        results: targetData.data.data.map(item => item.post_id).slice(0, resultsLength).join(',')
       })
 
       // 整理要回傳的資料
@@ -195,6 +196,7 @@ const searchService = {
       if (!targetData.status) return cb(null, 400, { message: '找不到符合物件' })
 
       // 更新搜尋條件
+      const resultsLength = 20
       const searchData = await isSearchExisted.update({
         name,
         UserId,
@@ -208,7 +210,7 @@ const searchService = {
         minArea,
         maxArea,
         notCover,
-        results: targetData.data.data.map(item => item.post_id).slice(0, 20).join(',')
+        results: targetData.data.data.map(item => item.post_id).slice(0, resultsLength).join(',')
       })
 
       // 整理要回傳的資料
