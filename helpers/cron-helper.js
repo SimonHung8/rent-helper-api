@@ -25,7 +25,7 @@ module.exports = async () => {
         // 結果是否與上次相同
         const targetData = await targetRes.json()
         const originalResults = search.results.split(',').map(item => Number(item))
-        const newResults = targetData.data.data.map(item => item.post_id)
+        const newResults = targetData.data.data.map(item => item.post_id).slice(0, originalResults.length)
         const differentResults = newResults.filter(item => !originalResults.includes(item))
         if (differentResults.length) {
           // 更新資料庫

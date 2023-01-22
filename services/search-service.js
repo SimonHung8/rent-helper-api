@@ -81,7 +81,7 @@ const searchService = {
         minArea,
         maxArea,
         notCover,
-        results: targetData.data.data.map(item => item.post_id).join(',')
+        results: targetData.data.data.map(item => item.post_id).slice(0, 20).join(',')
       })
 
       // 整理要回傳的資料
@@ -208,7 +208,7 @@ const searchService = {
         minArea,
         maxArea,
         notCover,
-        results: targetData.data.data.map(item => item.post_id).join(',')
+        results: targetData.data.data.map(item => item.post_id).slice(0, 20).join(',')
       })
 
       // 整理要回傳的資料
